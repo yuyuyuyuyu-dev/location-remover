@@ -10,7 +10,7 @@ The picture never leaves your device. All the work happens in the browser.
 
 ## Link
 
-<https://yuyuyuyuyu-dev.github.io/location-remover/>
+<https://location-remover.yuyuyuyuyu.dev>
 
 ## How it is built
 
