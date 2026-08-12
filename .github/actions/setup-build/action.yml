@@ -1,0 +1,19 @@
+name: Setup build
+description: >
+  Sets up the JDK and Gradle toolchain shared by every job that runs Gradle in
+  this repository, so the toolchain is configured identically everywhere.
+
+runs:
+  using: composite
+  steps:
+    # Azul 21 is what gradle/gradle-daemon-jvm.properties asks for. Installing any
+    # other JDK here would still work, but Gradle would then download that one
+    # itself on every run.
+    - name: Setup JDK
+      uses: actions/setup-java@v5
+      with:
+        java-version: "21"
+        distribution: "zulu"
+
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v6
