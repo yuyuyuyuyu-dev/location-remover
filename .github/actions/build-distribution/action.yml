@@ -1,0 +1,22 @@
+name: Build distribution
+description: >
+  Sets up the toolchain and builds the production Wasm browser distribution as a
+  PWA. Shared by the CI build check and the deploy job so both run the exact same
+  build, preventing a build break from surfacing only at deploy time.
+
+runs:
+  using: composite
+  steps:
+    - name: Setup build
+      uses: ./.github/actions/setup-build
+
+    # The ComposePWA plugin generates the service worker by calling workbox-cli
+    # through npx, which needs Node.js on the runner.
+    - name: Setup Node.js
+      uses: actions/setup-node@v7
+      with:
+        node-version: "24"
+
+    - name: Build
+      shell: bash
+      run: ./gradlew :webApp:wasmJsBrowserDistribution
