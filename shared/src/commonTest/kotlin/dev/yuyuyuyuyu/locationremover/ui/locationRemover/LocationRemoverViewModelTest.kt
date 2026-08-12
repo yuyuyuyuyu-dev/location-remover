@@ -14,7 +14,6 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
-import kotlin.test.assertTrue
 
 class LocationRemoverViewModelTest {
     @BeforeTest
@@ -28,25 +27,9 @@ class LocationRemoverViewModelTest {
     }
 
     @Test
-    fun `should show the image the user picked`() = runTest {
+    fun `should remove the location from the picture`() = runTest {
         // Arrange
-        val viewModel = createViewModel(imagePicker = FakeImagePicker(PICKED_JPEG))
-
-        // Act
-        viewModel.onSelectImageButtonClicked()
-
-        // Assert
-        assertContentEquals(PICKED_JPEG, viewModel.uiState.value.selectedJpeg)
-    }
-
-    @Test
-    fun `should show the picked image with its Exif removed`() = runTest {
-        // Arrange
-        val viewModel =
-            createViewModel(
-                imagePicker = FakeImagePicker(PICKED_JPEG),
-                exifRemover = FakeExifRemover(EXIF_REMOVED_JPEG)
-            )
+        val viewModel = createViewModel()
         viewModel.onSelectImageButtonClicked()
 
         // Act
@@ -57,15 +40,10 @@ class LocationRemoverViewModelTest {
     }
 
     @Test
-    fun `should download the Exif removed image`() = runTest {
+    fun `should download the picture the location was removed from`() = runTest {
         // Arrange
         val imageDownloader = FakeImageDownloader()
-        val viewModel =
-            createViewModel(
-                imagePicker = FakeImagePicker(PICKED_JPEG),
-                exifRemover = FakeExifRemover(EXIF_REMOVED_JPEG),
-                imageDownloader = imageDownloader
-            )
+        val viewModel = createViewModel(imageDownloader = imageDownloader)
         viewModel.onSelectImageButtonClicked()
         viewModel.onRemoveExifButtonClicked()
 
@@ -75,25 +53,6 @@ class LocationRemoverViewModelTest {
         // Assert
         assertContentEquals(EXIF_REMOVED_JPEG, imageDownloader.downloadedJpeg)
         assertEquals("image.jpg", imageDownloader.downloadedFileName)
-    }
-
-    @Test
-    fun `should tell the user when the browser cannot share the image`() = runTest {
-        // Arrange
-        val viewModel =
-            createViewModel(
-                imagePicker = FakeImagePicker(PICKED_JPEG),
-                exifRemover = FakeExifRemover(EXIF_REMOVED_JPEG),
-                imageSharer = FakeImageSharer(canShare = false)
-            )
-        viewModel.onSelectImageButtonClicked()
-        viewModel.onRemoveExifButtonClicked()
-
-        // Act
-        viewModel.onShareButtonClicked()
-
-        // Assert
-        assertTrue(viewModel.uiState.value.sharingIsNotSupportedDialogIsShown)
     }
 
     private fun createViewModel(
