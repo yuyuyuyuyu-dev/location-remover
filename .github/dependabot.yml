@@ -1,0 +1,20 @@
+version: 2
+
+updates:
+  # A single directory is enough for Gradle: every dependency and plugin version lives
+  # in gradle/libs.versions.toml, and the subprojects only reference catalog aliases.
+  - package-ecosystem: gradle
+    directory: "/"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 1
+
+  - package-ecosystem: github-actions
+    directories:
+      - "/"
+      # "/" only covers .github/workflows, so the composite actions under
+      # .github/actions have to be listed separately to be updated at all.
+      - "/.github/actions/*"
+    schedule:
+      interval: daily
+    open-pull-requests-limit: 1
