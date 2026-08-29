@@ -10,7 +10,7 @@ runs:
     # other JDK here would still work, but Gradle would then download that one
     # itself on every run.
     - name: Setup JDK
-      uses: actions/setup-java@v5
+      uses: actions/setup-java@v6
       with:
         java-version: "21"
         distribution: "zulu"
