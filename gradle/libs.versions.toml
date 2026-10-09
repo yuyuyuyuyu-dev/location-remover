@@ -15,7 +15,7 @@ junit = "4.13.2"
 kotlin = "2.4.20"
 kotlin-wrappers = "2026.9.3"
 kotlinx-coroutines = "1.11.0"
-material3 = "1.13.0-alpha01"
+material3 = "1.13.0-alpha02"
 myMaterialTheme = "0.4.0"
 
 [libraries]
