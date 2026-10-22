@@ -3,6 +3,24 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
+}
+
+ktlint {
+    version = libs.versions.ktlintCli.get()
+    filter {
+        val buildPath = layout.buildDirectory.get().asFile.path
+        exclude { it.file.path.startsWith(buildPath) }
+    }
+}
+
+detekt {
+    source.setFrom("src")
+    config.setFrom(rootProject.files("config/detekt/detekt.yml"))
+    buildUponDefaultConfig = true
+    parallel = true
+    basePath = rootDir
 }
 
 kotlin {
