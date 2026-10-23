@@ -22,9 +22,10 @@ class CanvasExifRemover : ExifRemover {
             canvas.width = bitmap.width
             canvas.height = bitmap.height
 
-            val context = checkNotNull(canvas.getContext(CanvasRenderingContext2D.ID)) {
-                "The browser does not provide a 2D canvas context."
-            }
+            val context =
+                checkNotNull(canvas.getContext(CanvasRenderingContext2D.ID)) {
+                    "The browser does not provide a 2D canvas context."
+                }
             context.drawImage(bitmap, 0.0, 0.0)
         }
 

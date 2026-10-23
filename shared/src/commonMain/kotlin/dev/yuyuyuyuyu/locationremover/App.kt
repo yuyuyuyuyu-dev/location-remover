@@ -38,7 +38,7 @@ fun App() {
                 imagePicker = createImagePicker(),
                 exifRemover = createExifRemover(),
                 imageDownloader = createImageDownloader(),
-                imageSharer = createImageSharer()
+                imageSharer = createImageSharer(),
             )
         }
     val uriHandler = LocalUriHandler.current
@@ -51,17 +51,17 @@ fun App() {
             bottomBar = {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Center,
                 ) {
                     TextButton(onClick = { uriHandler.openUri(SOURCE_CODE_URL) }) {
                         Text(stringResource(Res.string.source_code))
                     }
                 }
-            }
+            },
         ) { innerPadding ->
             LocationRemoverScreen(
                 viewModel = viewModel,
-                modifier = Modifier.padding(innerPadding)
+                modifier = Modifier.padding(innerPadding),
             )
         }
     }

@@ -3,6 +3,22 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.ktlint)
+    alias(libs.plugins.detekt)
+}
+
+ktlint {
+    version = libs.versions.ktlintCli.get()
+    filter {
+        val buildPath = layout.buildDirectory.get().asFile.path
+        exclude { it.file.path.startsWith(buildPath) }
+    }
+}
+
+detekt {
+    source.setFrom("src")
+    config.setFrom(rootProject.files("config/detekt/detekt.yml"))
+    buildUponDefaultConfig = true
 }
 
 kotlin {
@@ -21,12 +37,12 @@ dependencies {
 
 android {
     namespace = "dev.yuyuyuyuyu.locationremover"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk = providers.gradleProperty("sdk.compile").get().toInt()
 
     defaultConfig {
         applicationId = "dev.yuyuyuyuyu.locationremover"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk = providers.gradleProperty("sdk.min").get().toInt()
+        targetSdk = providers.gradleProperty("sdk.target").get().toInt()
         versionCode = 1
         versionName = "1.0"
     }

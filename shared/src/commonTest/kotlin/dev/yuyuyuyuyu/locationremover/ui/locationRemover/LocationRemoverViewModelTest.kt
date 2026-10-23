@@ -29,42 +29,46 @@ class LocationRemoverViewModelTest {
     }
 
     @Test
+    @Suppress("ForbiddenComment")
     fun `should remove the location from the picture`() {
         // TODO: The canvas removes the location, and a fake canvas would prove nothing. Write this
         //  against a real browser.
     }
 
     @Test
+    @Suppress("ForbiddenComment")
     fun `should copy the picture the location was removed from to the clipboard`() {
         // TODO: Not implemented yet.
     }
 
     @Test
+    @Suppress("ForbiddenComment")
     fun `should post the picture the location was removed from to X`() {
         // TODO: Not implemented yet.
     }
 
     @Test
-    fun `should download the picture the location was removed from`() = runTest {
-        // Arrange
-        val imageDownloader = FakeImageDownloader()
-        val viewModel = createViewModel(imageDownloader = imageDownloader)
-        viewModel.onSelectImageButtonClicked()
-        viewModel.onRemoveExifButtonClicked()
+    fun `should download the picture the location was removed from`() =
+        runTest {
+            // Arrange
+            val imageDownloader = FakeImageDownloader()
+            val viewModel = createViewModel(imageDownloader = imageDownloader)
+            viewModel.onSelectImageButtonClicked()
+            viewModel.onRemoveExifButtonClicked()
 
-        // Act
-        viewModel.onDownloadButtonClicked()
+            // Act
+            viewModel.onDownloadButtonClicked()
 
-        // Assert
-        assertContentEquals(EXIF_REMOVED_JPEG, imageDownloader.downloadedJpeg)
-        assertEquals("image.jpg", imageDownloader.downloadedFileName)
-    }
+            // Assert
+            assertContentEquals(EXIF_REMOVED_JPEG, imageDownloader.downloadedJpeg)
+            assertEquals("image.jpg", imageDownloader.downloadedFileName)
+        }
 
     private fun createViewModel(
         imagePicker: ImagePicker = FakeImagePicker(PICKED_JPEG),
         exifRemover: ExifRemover = FakeExifRemover(EXIF_REMOVED_JPEG),
         imageDownloader: ImageDownloader = FakeImageDownloader(),
-        imageSharer: ImageSharer = FakeImageSharer(canShare = true)
+        imageSharer: ImageSharer = FakeImageSharer(canShare = true),
     ) = LocationRemoverViewModel(imagePicker, exifRemover, imageDownloader, imageSharer)
 
     private companion object {
@@ -73,11 +77,15 @@ class LocationRemoverViewModelTest {
     }
 }
 
-private class FakeImagePicker(private val jpeg: ByteArray?) : ImagePicker {
+private class FakeImagePicker(
+    private val jpeg: ByteArray?,
+) : ImagePicker {
     override suspend fun pickJpegOrNull(): ByteArray? = jpeg
 }
 
-private class FakeExifRemover(private val exifRemovedJpeg: ByteArray) : ExifRemover {
+private class FakeExifRemover(
+    private val exifRemovedJpeg: ByteArray,
+) : ExifRemover {
     override suspend fun removeExif(jpeg: ByteArray): ByteArray = exifRemovedJpeg
 }
 
@@ -87,12 +95,20 @@ private class FakeImageDownloader : ImageDownloader {
     var downloadedFileName: String? = null
         private set
 
-    override fun download(jpeg: ByteArray, fileName: String) {
+    override fun download(
+        jpeg: ByteArray,
+        fileName: String,
+    ) {
         downloadedJpeg = jpeg
         downloadedFileName = fileName
     }
 }
 
-private class FakeImageSharer(private val canShare: Boolean) : ImageSharer {
-    override suspend fun tryShare(jpeg: ByteArray, fileName: String): Boolean = canShare
+private class FakeImageSharer(
+    private val canShare: Boolean,
+) : ImageSharer {
+    override suspend fun tryShare(
+        jpeg: ByteArray,
+        fileName: String,
+    ): Boolean = canShare
 }

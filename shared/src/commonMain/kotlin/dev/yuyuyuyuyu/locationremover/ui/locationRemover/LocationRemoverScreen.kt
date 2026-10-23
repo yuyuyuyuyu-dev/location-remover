@@ -40,7 +40,10 @@ import locationremover.shared.generated.resources.supported_environments
 import org.jetbrains.compose.resources.stringResource
 
 @Composable
-fun LocationRemoverScreen(viewModel: LocationRemoverViewModel, modifier: Modifier = Modifier) {
+fun LocationRemoverScreen(
+    viewModel: LocationRemoverViewModel,
+    modifier: Modifier = Modifier,
+) {
     val uiState by viewModel.uiState.collectAsState()
 
     Column(
@@ -50,12 +53,12 @@ fun LocationRemoverScreen(viewModel: LocationRemoverViewModel, modifier: Modifie
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         Text(
             text = stringResource(Res.string.please_select_an_image),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.headlineSmall,
         )
 
         Button(onClick = viewModel::onSelectImageButtonClicked) {
@@ -66,7 +69,7 @@ fun LocationRemoverScreen(viewModel: LocationRemoverViewModel, modifier: Modifie
             JpegImage(
                 jpeg = selectedJpeg,
                 contentDescription = stringResource(Res.string.selected_image),
-                modifier = Modifier.widthIn(max = 320.dp)
+                modifier = Modifier.widthIn(max = 320.dp),
             )
 
             Button(onClick = viewModel::onRemoveExifButtonClicked) {
@@ -80,7 +83,7 @@ fun LocationRemoverScreen(viewModel: LocationRemoverViewModel, modifier: Modifie
             JpegImage(
                 jpeg = exifRemovedJpeg,
                 contentDescription = stringResource(Res.string.exif_removed_image),
-                modifier = Modifier.widthIn(max = 640.dp)
+                modifier = Modifier.widthIn(max = 640.dp),
             )
 
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -97,20 +100,24 @@ fun LocationRemoverScreen(viewModel: LocationRemoverViewModel, modifier: Modifie
 
     if (uiState.sharingIsNotSupportedDialogIsShown) {
         SharingIsNotSupportedDialog(
-            onDismissRequest = viewModel::onSharingIsNotSupportedDialogDismissed
+            onDismissRequest = viewModel::onSharingIsNotSupportedDialogDismissed,
         )
     }
 }
 
 @Composable
-private fun JpegImage(jpeg: ByteArray, contentDescription: String, modifier: Modifier = Modifier) {
+private fun JpegImage(
+    jpeg: ByteArray,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+) {
     val imageBitmap = remember(jpeg) { jpeg.decodeToImageBitmap() }
 
     Image(
         bitmap = imageBitmap,
         contentDescription = contentDescription,
         modifier = modifier.fillMaxWidth(),
-        contentScale = ContentScale.FillWidth
+        contentScale = ContentScale.FillWidth,
     )
 }
 
@@ -124,6 +131,6 @@ private fun SharingIsNotSupportedDialog(onDismissRequest: () -> Unit) {
             }
         },
         title = { Text(stringResource(Res.string.sharing_is_not_supported)) },
-        text = { Text(stringResource(Res.string.supported_environments)) }
+        text = { Text(stringResource(Res.string.supported_environments)) },
     )
 }
