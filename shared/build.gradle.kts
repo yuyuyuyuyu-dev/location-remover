@@ -22,8 +22,6 @@ detekt {
     source.setFrom("src")
     config.setFrom(rootProject.files("config/detekt/detekt.yml"))
     buildUponDefaultConfig = true
-    parallel = true
-    basePath = rootDir
 }
 
 kotlin {
