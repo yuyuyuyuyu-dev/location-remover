@@ -39,12 +39,12 @@ dependencies {
 
 android {
     namespace = "dev.yuyuyuyuyu.locationremover"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
+    compileSdk = providers.gradleProperty("sdk.compile").get().toInt()
 
     defaultConfig {
         applicationId = "dev.yuyuyuyuyu.locationremover"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
+        minSdk = providers.gradleProperty("sdk.min").get().toInt()
+        targetSdk = providers.gradleProperty("sdk.target").get().toInt()
         versionCode = 1
         versionName = "1.0"
     }
