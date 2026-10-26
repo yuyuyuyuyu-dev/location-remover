@@ -6,32 +6,16 @@ on:
     types: [completed]
     branches: [main]
 
+permissions: {}
+
 jobs:
   deploy:
     name: Deploy
     if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
-    runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: write # to deploy to Pages
-      id-token: write # to verify the deployment originates from an appropriate source
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v7
-
-      # Shared with the CI build check (see .github/actions/build-distribution) so
-      # deploy and CI always run the exact same build.
-      - name: Build distribution
-        uses: ./.github/actions/build-distribution
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          path: webApp/build/dist/wasmJs/productionExecutable
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v5
+      pages: write
+      id-token: write
+    uses: yuyuyuyuyu-dev/repo-config/.github/workflows/deploy-to-github-pages.yml@main
+    with:
+      app-module: webApp

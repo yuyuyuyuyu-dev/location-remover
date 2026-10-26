@@ -6,7 +6,10 @@ import web.timers.setTimeout
 import web.url.URL
 
 class BrowserImageDownloader : ImageDownloader {
-    override fun download(jpeg: ByteArray, fileName: String) {
+    override fun download(
+        jpeg: ByteArray,
+        fileName: String,
+    ) {
         val objectUrl = URL.createObjectURL(jpeg.toJpegBlob())
 
         val link = document.createElement(HtmlTagName.a)

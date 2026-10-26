@@ -10,12 +10,16 @@ import web.navigator.share
 import web.share.ShareData
 
 class WebShareImageSharer : ImageSharer {
-    override suspend fun tryShare(jpeg: ByteArray, fileName: String): Boolean {
-        val file = File(
-            fileBits = jsArrayOf(jpeg.toUint8Array()),
-            fileName = fileName,
-            options = unsafeJso<FilePropertyBag> { type = JPEG_MIME_TYPE },
-        )
+    override suspend fun tryShare(
+        jpeg: ByteArray,
+        fileName: String,
+    ): Boolean {
+        val file =
+            File(
+                fileBits = jsArrayOf(jpeg.toUint8Array()),
+                fileName = fileName,
+                options = unsafeJso<FilePropertyBag> { type = JPEG_MIME_TYPE },
+            )
         val shareData = unsafeJso<ShareData> { files = jsArrayOf(file) }
 
         // Browsers without the Web Share API have no canShare either, so reaching it at all is

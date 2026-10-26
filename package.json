@@ -1,0 +1,9 @@
+{
+  "private": true,
+  "scripts": {
+    "oxfmt": "oxfmt"
+  },
+  "devDependencies": {
+    "oxfmt": "0.74.0"
+  }
+}
