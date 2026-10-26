@@ -15,7 +15,7 @@ kotlin-wrappers = "2026.10.1"
 kotlinx-coroutines = "1.11.0"
 ktlint = "14.2.0"
 ktlintCli = "1.8.0"
-material3 = "1.13.0-alpha02"
+material3 = "1.13.0-beta01"
 myMaterialTheme = "0.4.0"
 versionCatalogUpdate = "1.1.1"
 
