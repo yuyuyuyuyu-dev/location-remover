@@ -11,13 +11,13 @@ composePwa = "0.7.0"
 detekt = "2.0.0-alpha.6"
 junit = "4.13.2"
 kotlin = "2.4.21"
-kotlin-wrappers = "2026.10.4"
+kotlin-wrappers = "2026.10.5"
 kotlinx-coroutines = "1.11.0"
 ktlint = "14.2.0"
 ktlintCli = "1.8.0"
 material3 = "1.13.0-beta01"
 myMaterialTheme = "0.4.0"
-versionCatalogUpdate = "1.1.1"
+versionCatalogUpdate = "1.1.2"
 
 [libraries]
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activity" }
