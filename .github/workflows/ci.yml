@@ -44,7 +44,7 @@ jobs:
           compose-multiplatform: true
 
       - name: Run Tests
-        run: ./gradlew :shared:jvmTest
+        run: ./gradlew allTests
 
   build:
     name: Build Distribution
