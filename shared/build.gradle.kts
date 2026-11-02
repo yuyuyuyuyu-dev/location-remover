@@ -25,12 +25,6 @@ detekt {
 }
 
 kotlin {
-    jvm()
-    
-    js {
-        browser()
-    }
-    
     @OptIn(ExperimentalWasmDsl::class)
     wasmJs {
         // Reaching browser APIs from Kotlin/Wasm is experimental interop by definition, and
@@ -38,6 +32,7 @@ kotlin {
         compilerOptions.optIn.add("kotlin.js.ExperimentalWasmJsInterop")
 
         browser()
+        binaries.executable()
     }
     
     android {
