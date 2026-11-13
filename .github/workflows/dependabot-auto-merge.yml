@@ -1,0 +1,42 @@
+name: Dependabot auto-merge
+
+# pull_request_target rather than pull_request: a run triggered by Dependabot on
+# pull_request cannot read Actions secrets, which would put the App private key out of
+# reach. Nothing from the pull request is checked out or executed here, so the elevated
+# context stays harmless.
+on:
+  pull_request_target:
+    branches: ["main"]
+
+jobs:
+  auto-merge:
+    name: Enable auto-merge
+    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: read
+    steps:
+      - name: Fetch Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v3
+
+      # Merging goes through the yuyuyuyuyu-dev-pr-bot App instead of GITHUB_TOKEN,
+      # because a merge made with GITHUB_TOKEN does not trigger CI on main, and Deploy
+      # only runs after CI.
+      - name: Create App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.PR_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.PR_BOT_PRIVATE_KEY }}
+
+      # A grouped pull request reports the highest update type it carries, so this also
+      # keeps a group that somehow contains a major update from merging on its own.
+      - name: Enable auto-merge
+        if: >-
+          steps.metadata.outputs.update-type == 'version-update:semver-minor' ||
+          steps.metadata.outputs.update-type == 'version-update:semver-patch'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+        run: gh pr merge --auto --squash "$PR_URL"
