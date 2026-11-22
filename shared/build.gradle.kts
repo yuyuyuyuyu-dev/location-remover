@@ -37,7 +37,11 @@ kotlin {
     
     android {
        namespace = "dev.yuyuyuyuyu.locationremover.shared"
-       compileSdk = providers.gradleProperty("sdk.compile").get().toInt()
+       compileSdk {
+           version = release(providers.gradleProperty("sdk.compile").get().toInt()) {
+               minorApiLevel = providers.gradleProperty("sdk.compile.minor").get().toInt()
+           }
+       }
        minSdk = providers.gradleProperty("sdk.min").get().toInt()
     
        compilerOptions {
