@@ -87,6 +87,9 @@ kotlin {
         webMain.dependencies {
             implementation(libs.wrappers.browser)
         }
+        webTest.dependencies {
+            implementation(libs.compose.uiTest)
+        }
     }
 }
 
