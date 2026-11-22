@@ -1,4 +1,4 @@
-package dev.yuyuyuyuyu.locationremover.ui.locationRemover
+package dev.yuyuyuyuyu.locationremover.spec
 
 import androidx.compose.ui.platform.UriHandler
 import dev.yuyuyuyuyu.locationremover.image.ExifRemover
@@ -6,6 +6,7 @@ import dev.yuyuyuyuyu.locationremover.image.ImageCopier
 import dev.yuyuyuyuyu.locationremover.image.ImageDownloader
 import dev.yuyuyuyuyu.locationremover.image.ImagePicker
 import dev.yuyuyuyuyu.locationremover.image.ImageSharer
+import dev.yuyuyuyuyu.locationremover.ui.locationRemover.LocationRemoverViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
