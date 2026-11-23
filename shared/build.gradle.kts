@@ -1,3 +1,4 @@
+import com.mikepenz.aboutlibraries.plugin.AboutLibrariesTask
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -89,30 +90,31 @@ kotlin {
     }
 }
 
-aboutLibraries {
-    export {
-        outputFile = layout.buildDirectory.file("generated/libraryDefinitions/aboutlibraries.json")
-    }
-}
-
-val commonMainComposeResourcesDirectory = layout.buildDirectory.dir("generated/commonMainComposeResources")
-
-val syncCommonMainComposeResources =
-    tasks.register<Sync>("syncCommonMainComposeResources") {
-        from("src/commonMain/composeResources")
-        from(tasks.named("exportLibraryDefinitions")) {
-            into("files")
+mapOf(
+    "android" to "androidMain",
+    "wasmJs" to "wasmJsMain",
+).forEach { (target, sourceSetName) ->
+    val libraryDefinitionsDirectory = layout.buildDirectory.dir("generated/libraryDefinitions/$target")
+    val exportLibraryDefinitions =
+        tasks.register<AboutLibrariesTask>("exportLibraryDefinitionsFor${target.replaceFirstChar(Char::uppercase)}") {
+            variant = target
+            includeMetaData = false
+            prettyPrint = false
+            excludeFields = emptySet()
+            configureOutputFile(libraryDefinitionsDirectory.map { it.file("files/aboutlibraries.json") })
+            configure()
         }
-        into(commonMainComposeResourcesDirectory)
-    }
 
-compose.resources {
-    customDirectory(
-        sourceSetName = "commonMain",
-        directoryProvider = syncCommonMainComposeResources.map { commonMainComposeResourcesDirectory.get() },
-    )
+    compose.resources {
+        customDirectory(
+            sourceSetName = sourceSetName,
+            directoryProvider = exportLibraryDefinitions.map { libraryDefinitionsDirectory.get() },
+        )
+    }
 }
 
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
 }
+
+tasks.matching { it.name == "prepareLibraryDefinitionsAndroidMain" }.configureEach { enabled = false }
