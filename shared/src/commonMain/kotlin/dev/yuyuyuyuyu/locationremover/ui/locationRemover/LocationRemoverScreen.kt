@@ -3,7 +3,7 @@ package dev.yuyuyuyuyu.locationremover.ui.locationRemover
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -27,10 +27,17 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import locationremover.shared.generated.resources.Res
+import locationremover.shared.generated.resources.attach_the_downloaded_image
+import locationremover.shared.generated.resources.cancel
+import locationremover.shared.generated.resources.copying_is_not_supported
 import locationremover.shared.generated.resources.download
 import locationremover.shared.generated.resources.exif_removed_image
+import locationremover.shared.generated.resources.image_copied
 import locationremover.shared.generated.resources.ok
+import locationremover.shared.generated.resources.open_x
+import locationremover.shared.generated.resources.paste_the_image_into_the_post
 import locationremover.shared.generated.resources.please_select_an_image
+import locationremover.shared.generated.resources.post_to_x
 import locationremover.shared.generated.resources.remove_exif
 import locationremover.shared.generated.resources.select_an_image
 import locationremover.shared.generated.resources.selected_image
@@ -86,7 +93,10 @@ fun LocationRemoverScreen(
                 modifier = Modifier.widthIn(max = 640.dp),
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
                 Button(onClick = viewModel::onDownloadButtonClicked) {
                     Text(stringResource(Res.string.download))
                 }
@@ -94,13 +104,38 @@ fun LocationRemoverScreen(
                 Button(onClick = viewModel::onShareButtonClicked) {
                     Text(stringResource(Res.string.share))
                 }
+
+                Button(onClick = viewModel::onPostToXButtonClicked) {
+                    Text(stringResource(Res.string.post_to_x))
+                }
             }
         }
     }
 
+    LocationRemoverDialogs(uiState = uiState, viewModel = viewModel)
+}
+
+@Composable
+private fun LocationRemoverDialogs(
+    uiState: LocationRemoverUiState,
+    viewModel: LocationRemoverViewModel,
+) {
     if (uiState.sharingIsNotSupportedDialogIsShown) {
         SharingIsNotSupportedDialog(
             onDismissRequest = viewModel::onSharingIsNotSupportedDialogDismissed,
+        )
+    }
+
+    if (uiState.imageCopiedDialogIsShown) {
+        ImageCopiedDialog(
+            onOpenXRequest = viewModel::onOpenXButtonClicked,
+            onDismissRequest = viewModel::onImageCopiedDialogDismissed,
+        )
+    }
+
+    if (uiState.copyingIsNotSupportedDialogIsShown) {
+        CopyingIsNotSupportedDialog(
+            onDismissRequest = viewModel::onCopyingIsNotSupportedDialogDismissed,
         )
     }
 }
@@ -132,5 +167,41 @@ private fun SharingIsNotSupportedDialog(onDismissRequest: () -> Unit) {
         },
         title = { Text(stringResource(Res.string.sharing_is_not_supported)) },
         text = { Text(stringResource(Res.string.supported_environments)) },
+    )
+}
+
+@Composable
+private fun ImageCopiedDialog(
+    onOpenXRequest: () -> Unit,
+    onDismissRequest: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = onOpenXRequest) {
+                Text(stringResource(Res.string.open_x))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(stringResource(Res.string.cancel))
+            }
+        },
+        title = { Text(stringResource(Res.string.image_copied)) },
+        text = { Text(stringResource(Res.string.paste_the_image_into_the_post)) },
+    )
+}
+
+@Composable
+private fun CopyingIsNotSupportedDialog(onDismissRequest: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(stringResource(Res.string.ok))
+            }
+        },
+        title = { Text(stringResource(Res.string.copying_is_not_supported)) },
+        text = { Text(stringResource(Res.string.attach_the_downloaded_image)) },
     )
 }

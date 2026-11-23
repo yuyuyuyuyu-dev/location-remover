@@ -1,8 +1,10 @@
 package dev.yuyuyuyuyu.locationremover.ui.locationRemover
 
+import androidx.compose.ui.platform.UriHandler
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.yuyuyuyuyu.locationremover.image.ExifRemover
+import dev.yuyuyuyuyu.locationremover.image.ImageCopier
 import dev.yuyuyuyuyu.locationremover.image.ImageDownloader
 import dev.yuyuyuyuyu.locationremover.image.ImagePicker
 import dev.yuyuyuyuyu.locationremover.image.ImageSharer
@@ -17,6 +19,8 @@ class LocationRemoverViewModel(
     private val exifRemover: ExifRemover,
     private val imageDownloader: ImageDownloader,
     private val imageSharer: ImageSharer,
+    private val imageCopier: ImageCopier,
+    private val uriHandler: UriHandler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LocationRemoverUiState())
     val uiState: StateFlow<LocationRemoverUiState> = _uiState.asStateFlow()
@@ -60,7 +64,33 @@ class LocationRemoverViewModel(
         _uiState.update { it.copy(sharingIsNotSupportedDialogIsShown = false) }
     }
 
+    fun onPostToXButtonClicked() {
+        val exifRemovedJpeg = _uiState.value.exifRemovedJpeg ?: return
+
+        viewModelScope.launch {
+            if (imageCopier.tryCopy(exifRemovedJpeg)) {
+                _uiState.update { it.copy(imageCopiedDialogIsShown = true) }
+            } else {
+                _uiState.update { it.copy(copyingIsNotSupportedDialogIsShown = true) }
+            }
+        }
+    }
+
+    fun onOpenXButtonClicked() {
+        _uiState.update { it.copy(imageCopiedDialogIsShown = false) }
+        uriHandler.openUri(X_POST_URL)
+    }
+
+    fun onImageCopiedDialogDismissed() {
+        _uiState.update { it.copy(imageCopiedDialogIsShown = false) }
+    }
+
+    fun onCopyingIsNotSupportedDialogDismissed() {
+        _uiState.update { it.copy(copyingIsNotSupportedDialogIsShown = false) }
+    }
+
     private companion object {
         private const val FILE_NAME = "image.jpg"
+        private const val X_POST_URL = "https://x.com/intent/post"
     }
 }

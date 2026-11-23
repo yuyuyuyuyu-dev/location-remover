@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import dev.yuyuyuyuyu.locationremover.image.createExifRemover
+import dev.yuyuyuyuyu.locationremover.image.createImageCopier
 import dev.yuyuyuyuyu.locationremover.image.createImageDownloader
 import dev.yuyuyuyuyu.locationremover.image.createImagePicker
 import dev.yuyuyuyuyu.locationremover.image.createImageSharer
@@ -32,6 +33,7 @@ private const val SOURCE_CODE_URL = "https://github.com/yuyuyuyuyu-dev/location-
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
 fun App() {
+    val uriHandler = LocalUriHandler.current
     val viewModel =
         remember {
             LocationRemoverViewModel(
@@ -39,9 +41,10 @@ fun App() {
                 exifRemover = createExifRemover(),
                 imageDownloader = createImageDownloader(),
                 imageSharer = createImageSharer(),
+                imageCopier = createImageCopier(),
+                uriHandler = uriHandler,
             )
         }
-    val uriHandler = LocalUriHandler.current
 
     MyMaterialTheme {
         Scaffold(

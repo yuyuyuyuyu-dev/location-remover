@@ -9,6 +9,13 @@
     <string name="share">シェアする</string>
     <string name="sharing_is_not_supported">お使いのブラウザは共有機能に対応していません</string>
     <string name="supported_environments">対応環境\n\niPhone、iPad\n・iOS/iPadOS 15以上\n\nAndroid\n・Google Chrome 79以上\n\nWindows\n・Microsoft Edge 89以上\n・Google Chrome 89以上\n\nMac\n・Safari 15以上</string>
+    <string name="post_to_x">Xに投稿</string>
+    <string name="image_copied">画像をコピーしました</string>
+    <string name="paste_the_image_into_the_post">Xの投稿画面が開いたら、投稿欄に画像を貼り付けてください</string>
+    <string name="open_x">Xを開く</string>
+    <string name="cancel">キャンセル</string>
+    <string name="copying_is_not_supported">お使いのブラウザは画像のコピーに対応していません</string>
+    <string name="attach_the_downloaded_image">ダウンロードした画像をXの投稿に添付してください</string>
     <string name="ok">OK</string>
     <string name="source_code">ソースコード</string>
 </resources>
