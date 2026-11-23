@@ -18,8 +18,8 @@ class LocationRemoverViewModel(
     private val imagePicker: ImagePicker,
     private val exifRemover: ExifRemover,
     private val imageDownloader: ImageDownloader,
-    private val imageSharer: ImageSharer,
     private val imageCopier: ImageCopier,
+    private val imageSharer: ImageSharer,
     private val uriHandler: UriHandler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LocationRemoverUiState())
@@ -50,6 +50,26 @@ class LocationRemoverViewModel(
         imageDownloader.download(exifRemovedJpeg, FILE_NAME)
     }
 
+    fun onCopyButtonClicked() {
+        val exifRemovedJpeg = _uiState.value.exifRemovedJpeg ?: return
+
+        viewModelScope.launch {
+            if (imageCopier.tryCopy(exifRemovedJpeg)) {
+                _uiState.update { it.copy(copiedMessageIsShown = true) }
+            } else {
+                _uiState.update { it.copy(copyingFailedDialogIsShown = true) }
+            }
+        }
+    }
+
+    fun onCopiedMessageShown() {
+        _uiState.update { it.copy(copiedMessageIsShown = false) }
+    }
+
+    fun onCopyingFailedDialogDismissed() {
+        _uiState.update { it.copy(copyingFailedDialogIsShown = false) }
+    }
+
     fun onShareButtonClicked() {
         val exifRemovedJpeg = _uiState.value.exifRemovedJpeg ?: return
 
@@ -71,7 +91,7 @@ class LocationRemoverViewModel(
             if (imageCopier.tryCopy(exifRemovedJpeg)) {
                 _uiState.update { it.copy(imageCopiedDialogIsShown = true) }
             } else {
-                _uiState.update { it.copy(copyingIsNotSupportedDialogIsShown = true) }
+                _uiState.update { it.copy(copyingFailedDialogIsShown = true) }
             }
         }
     }
@@ -83,10 +103,6 @@ class LocationRemoverViewModel(
 
     fun onImageCopiedDialogDismissed() {
         _uiState.update { it.copy(imageCopiedDialogIsShown = false) }
-    }
-
-    fun onCopyingIsNotSupportedDialogDismissed() {
-        _uiState.update { it.copy(copyingIsNotSupportedDialogIsShown = false) }
     }
 
     private companion object {

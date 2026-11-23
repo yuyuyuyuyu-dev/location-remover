@@ -17,6 +17,7 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
@@ -40,10 +41,38 @@ class LocationRemoverViewModelTest {
     }
 
     @Test
-    @Suppress("ForbiddenComment")
-    fun `should copy the picture the location was removed from to the clipboard`() {
-        // TODO: Not implemented yet.
-    }
+    fun `should copy the picture the location was removed from to the clipboard`() =
+        runTest {
+            // Arrange
+            val imageCopier = FakeImageCopier(canCopy = true)
+            val viewModel = createViewModel(imageCopier = imageCopier)
+            viewModel.onSelectImageButtonClicked()
+            viewModel.onRemoveExifButtonClicked()
+
+            // Act
+            viewModel.onCopyButtonClicked()
+
+            // Assert
+            assertContentEquals(EXIF_REMOVED_JPEG, imageCopier.copiedJpeg)
+            assertTrue(viewModel.uiState.value.copiedMessageIsShown)
+            assertFalse(viewModel.uiState.value.copyingFailedDialogIsShown)
+        }
+
+    @Test
+    fun `should tell that the picture could not be copied to the clipboard`() =
+        runTest {
+            // Arrange
+            val viewModel = createViewModel(imageCopier = FakeImageCopier(canCopy = false))
+            viewModel.onSelectImageButtonClicked()
+            viewModel.onRemoveExifButtonClicked()
+
+            // Act
+            viewModel.onCopyButtonClicked()
+
+            // Assert
+            assertTrue(viewModel.uiState.value.copyingFailedDialogIsShown)
+            assertFalse(viewModel.uiState.value.copiedMessageIsShown)
+        }
 
     @Test
     fun `should post the picture the location was removed from to X`() =
@@ -78,7 +107,7 @@ class LocationRemoverViewModelTest {
             viewModel.onPostToXButtonClicked()
 
             // Assert
-            assertTrue(viewModel.uiState.value.copyingIsNotSupportedDialogIsShown)
+            assertTrue(viewModel.uiState.value.copyingFailedDialogIsShown)
             assertNull(uriHandler.openedUri)
         }
 
@@ -103,10 +132,10 @@ class LocationRemoverViewModelTest {
         imagePicker: ImagePicker = FakeImagePicker(PICKED_JPEG),
         exifRemover: ExifRemover = FakeExifRemover(EXIF_REMOVED_JPEG),
         imageDownloader: ImageDownloader = FakeImageDownloader(),
-        imageSharer: ImageSharer = FakeImageSharer(canShare = true),
         imageCopier: ImageCopier = FakeImageCopier(canCopy = true),
+        imageSharer: ImageSharer = FakeImageSharer(canShare = true),
         uriHandler: UriHandler = FakeUriHandler(),
-    ) = LocationRemoverViewModel(imagePicker, exifRemover, imageDownloader, imageSharer, imageCopier, uriHandler)
+    ) = LocationRemoverViewModel(imagePicker, exifRemover, imageDownloader, imageCopier, imageSharer, uriHandler)
 
     private companion object {
         private val PICKED_JPEG = byteArrayOf(1, 2, 3)
@@ -141,15 +170,6 @@ private class FakeImageDownloader : ImageDownloader {
     }
 }
 
-private class FakeImageSharer(
-    private val canShare: Boolean,
-) : ImageSharer {
-    override suspend fun tryShare(
-        jpeg: ByteArray,
-        fileName: String,
-    ): Boolean = canShare
-}
-
 private class FakeImageCopier(
     private val canCopy: Boolean,
 ) : ImageCopier {
@@ -160,6 +180,15 @@ private class FakeImageCopier(
         if (canCopy) copiedJpeg = jpeg
         return canCopy
     }
+}
+
+private class FakeImageSharer(
+    private val canShare: Boolean,
+) : ImageSharer {
+    override suspend fun tryShare(
+        jpeg: ByteArray,
+        fileName: String,
+    ): Boolean = canShare
 }
 
 private class FakeUriHandler : UriHandler {
