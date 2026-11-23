@@ -1,3 +1,4 @@
+import com.mikepenz.aboutlibraries.plugin.AboutLibrariesTask
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -6,6 +7,7 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
 }
@@ -75,7 +77,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.coroutinesCore)
-            implementation(libs.yuyuyuyuyu.myMaterialTheme)
+            implementation(libs.yuyuyuyuyu.myComposables)
+            implementation(libs.aboutLibraries.composeCore)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -87,6 +90,31 @@ kotlin {
     }
 }
 
+mapOf(
+    "android" to "androidMain",
+    "wasmJs" to "wasmJsMain",
+).forEach { (target, sourceSetName) ->
+    val libraryDefinitionsDirectory = layout.buildDirectory.dir("generated/libraryDefinitions/$target")
+    val exportLibraryDefinitions =
+        tasks.register<AboutLibrariesTask>("exportLibraryDefinitionsFor${target.replaceFirstChar(Char::uppercase)}") {
+            variant = target
+            includeMetaData = false
+            prettyPrint = false
+            excludeFields = emptySet()
+            configureOutputFile(libraryDefinitionsDirectory.map { it.file("files/aboutlibraries.json") })
+            configure()
+        }
+
+    compose.resources {
+        customDirectory(
+            sourceSetName = sourceSetName,
+            directoryProvider = exportLibraryDefinitions.map { libraryDefinitionsDirectory.get() },
+        )
+    }
+}
+
 dependencies {
     androidRuntimeClasspath(libs.compose.uiTooling)
 }
+
+tasks.matching { it.name == "prepareLibraryDefinitionsAndroidMain" }.configureEach { enabled = false }

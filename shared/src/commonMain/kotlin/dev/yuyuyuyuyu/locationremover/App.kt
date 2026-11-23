@@ -1,21 +1,17 @@
 package dev.yuyuyuyuyu.locationremover
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
+import com.mikepenz.aboutlibraries.ui.compose.produceLibraries
 import dev.yuyuyuyuyu.locationremover.image.createExifRemover
 import dev.yuyuyuyuyu.locationremover.image.createImageCopier
 import dev.yuyuyuyuyu.locationremover.image.createImageDownloader
@@ -23,17 +19,16 @@ import dev.yuyuyuyuyu.locationremover.image.createImagePicker
 import dev.yuyuyuyuyu.locationremover.image.createImageSharer
 import dev.yuyuyuyuyu.locationremover.ui.locationRemover.LocationRemoverScreen
 import dev.yuyuyuyuyu.locationremover.ui.locationRemover.LocationRemoverViewModel
-import dev.yuyuyuyuyu.mymaterialtheme.MyMaterialTheme
+import dev.yuyuyuyuyu.mycomposables.MyMaterialTheme
+import dev.yuyuyuyuyu.mycomposables.MyScaffold
 import locationremover.shared.generated.resources.Res
 import locationremover.shared.generated.resources.app_name
-import locationremover.shared.generated.resources.source_code
 import org.jetbrains.compose.resources.stringResource
 
 private const val SOURCE_CODE_URL = "https://github.com/yuyuyuyuyu-dev/location-remover"
 
 @Composable
 @Preview
-@OptIn(ExperimentalMaterial3Api::class)
 fun App() {
     val uriHandler = LocalUriHandler.current
     val viewModel =
@@ -48,29 +43,26 @@ fun App() {
             )
         }
     val snackbarHostState = remember { SnackbarHostState() }
+    val libraries by produceLibraries {
+        Res.readBytes("files/aboutlibraries.json").decodeToString()
+    }
 
     MyMaterialTheme {
-        Scaffold(
-            topBar = {
-                TopAppBar(title = { Text(stringResource(Res.string.app_name)) })
-            },
-            snackbarHost = { SnackbarHost(snackbarHostState) },
-            bottomBar = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
-                    TextButton(onClick = { uriHandler.openUri(SOURCE_CODE_URL) }) {
-                        Text(stringResource(Res.string.source_code))
-                    }
-                }
-            },
+        MyScaffold(
+            title = stringResource(Res.string.app_name),
+            libraries = libraries,
+            onSourceCodeButtonClick = { uriHandler.openUri(SOURCE_CODE_URL) },
         ) { innerPadding ->
-            LocationRemoverScreen(
-                viewModel = viewModel,
-                snackbarHostState = snackbarHostState,
-                modifier = Modifier.padding(innerPadding),
-            )
+            Box(modifier = Modifier.padding(innerPadding)) {
+                LocationRemoverScreen(
+                    viewModel = viewModel,
+                    snackbarHostState = snackbarHostState,
+                )
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier.align(Alignment.BottomCenter),
+                )
+            }
         }
     }
 }
