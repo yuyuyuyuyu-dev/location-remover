@@ -1,5 +1,6 @@
 package dev.yuyuyuyuyu.locationremover.ui.locationRemover
 
+import androidx.compose.ui.platform.UriHandler
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dev.yuyuyuyuyu.locationremover.image.ExifRemover
@@ -19,6 +20,7 @@ class LocationRemoverViewModel(
     private val imageDownloader: ImageDownloader,
     private val imageCopier: ImageCopier,
     private val imageSharer: ImageSharer,
+    private val uriHandler: UriHandler,
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(LocationRemoverUiState())
     val uiState: StateFlow<LocationRemoverUiState> = _uiState.asStateFlow()
@@ -82,7 +84,29 @@ class LocationRemoverViewModel(
         _uiState.update { it.copy(sharingIsNotSupportedDialogIsShown = false) }
     }
 
+    fun onPostToXButtonClicked() {
+        val exifRemovedJpeg = _uiState.value.exifRemovedJpeg ?: return
+
+        viewModelScope.launch {
+            if (imageCopier.tryCopy(exifRemovedJpeg)) {
+                _uiState.update { it.copy(imageCopiedDialogIsShown = true) }
+            } else {
+                _uiState.update { it.copy(copyingFailedDialogIsShown = true) }
+            }
+        }
+    }
+
+    fun onOpenXButtonClicked() {
+        _uiState.update { it.copy(imageCopiedDialogIsShown = false) }
+        uriHandler.openUri(X_POST_URL)
+    }
+
+    fun onImageCopiedDialogDismissed() {
+        _uiState.update { it.copy(imageCopiedDialogIsShown = false) }
+    }
+
     private companion object {
         private const val FILE_NAME = "image.jpg"
+        private const val X_POST_URL = "https://x.com/intent/post"
     }
 }

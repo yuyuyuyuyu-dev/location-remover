@@ -6,4 +6,5 @@ data class LocationRemoverUiState(
     val copiedMessageIsShown: Boolean = false,
     val copyingFailedDialogIsShown: Boolean = false,
     val sharingIsNotSupportedDialogIsShown: Boolean = false,
+    val imageCopiedDialogIsShown: Boolean = false,
 )

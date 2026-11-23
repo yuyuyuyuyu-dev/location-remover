@@ -1,5 +1,6 @@
 package dev.yuyuyuyuyu.locationremover.ui.locationRemover
 
+import androidx.compose.ui.platform.UriHandler
 import dev.yuyuyuyuyu.locationremover.image.ExifRemover
 import dev.yuyuyuyuyu.locationremover.image.ImageCopier
 import dev.yuyuyuyuyu.locationremover.image.ImageDownloader
@@ -17,6 +18,7 @@ import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,10 +75,41 @@ class LocationRemoverViewModelTest {
         }
 
     @Test
-    @Suppress("ForbiddenComment")
-    fun `should post the picture the location was removed from to X`() {
-        // TODO: Not implemented yet.
-    }
+    fun `should post the picture the location was removed from to X`() =
+        runTest {
+            // Arrange
+            val imageCopier = FakeImageCopier(canCopy = true)
+            val uriHandler = FakeUriHandler()
+            val viewModel = createViewModel(imageCopier = imageCopier, uriHandler = uriHandler)
+            viewModel.onSelectImageButtonClicked()
+            viewModel.onRemoveExifButtonClicked()
+
+            // Act
+            viewModel.onPostToXButtonClicked()
+            viewModel.onOpenXButtonClicked()
+
+            // Assert
+            assertContentEquals(EXIF_REMOVED_JPEG, imageCopier.copiedJpeg)
+            assertEquals("https://x.com/intent/post", uriHandler.openedUri)
+        }
+
+    @Test
+    fun `should tell that the picture cannot be posted to X where the browser cannot copy it`() =
+        runTest {
+            // Arrange
+            val uriHandler = FakeUriHandler()
+            val viewModel =
+                createViewModel(imageCopier = FakeImageCopier(canCopy = false), uriHandler = uriHandler)
+            viewModel.onSelectImageButtonClicked()
+            viewModel.onRemoveExifButtonClicked()
+
+            // Act
+            viewModel.onPostToXButtonClicked()
+
+            // Assert
+            assertTrue(viewModel.uiState.value.copyingFailedDialogIsShown)
+            assertNull(uriHandler.openedUri)
+        }
 
     @Test
     fun `should download the picture the location was removed from`() =
@@ -101,7 +134,8 @@ class LocationRemoverViewModelTest {
         imageDownloader: ImageDownloader = FakeImageDownloader(),
         imageCopier: ImageCopier = FakeImageCopier(canCopy = true),
         imageSharer: ImageSharer = FakeImageSharer(canShare = true),
-    ) = LocationRemoverViewModel(imagePicker, exifRemover, imageDownloader, imageCopier, imageSharer)
+        uriHandler: UriHandler = FakeUriHandler(),
+    ) = LocationRemoverViewModel(imagePicker, exifRemover, imageDownloader, imageCopier, imageSharer, uriHandler)
 
     private companion object {
         private val PICKED_JPEG = byteArrayOf(1, 2, 3)
@@ -155,4 +189,13 @@ private class FakeImageSharer(
         jpeg: ByteArray,
         fileName: String,
     ): Boolean = canShare
+}
+
+private class FakeUriHandler : UriHandler {
+    var openedUri: String? = null
+        private set
+
+    override fun openUri(uri: String) {
+        openedUri = uri
+    }
 }

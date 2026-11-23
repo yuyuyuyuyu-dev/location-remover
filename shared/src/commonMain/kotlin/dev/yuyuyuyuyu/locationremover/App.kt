@@ -35,6 +35,7 @@ private const val SOURCE_CODE_URL = "https://github.com/yuyuyuyuyu-dev/location-
 @Preview
 @OptIn(ExperimentalMaterial3Api::class)
 fun App() {
+    val uriHandler = LocalUriHandler.current
     val viewModel =
         remember {
             LocationRemoverViewModel(
@@ -43,10 +44,10 @@ fun App() {
                 imageDownloader = createImageDownloader(),
                 imageCopier = createImageCopier(),
                 imageSharer = createImageSharer(),
+                uriHandler = uriHandler,
             )
         }
     val snackbarHostState = remember { SnackbarHostState() }
-    val uriHandler = LocalUriHandler.current
 
     MyMaterialTheme {
         Scaffold(
