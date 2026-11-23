@@ -94,6 +94,6 @@ private suspend fun waitInRealTime(duration: Duration) =
         delay(duration)
     }
 
-private val TIMEOUT = 10.seconds
+private val TIMEOUT = 1.seconds
 private val INTERVAL = 10.milliseconds
 private val SETTLING_TIME = 100.milliseconds
