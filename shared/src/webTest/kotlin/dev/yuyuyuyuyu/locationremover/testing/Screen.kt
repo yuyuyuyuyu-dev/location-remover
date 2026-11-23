@@ -2,10 +2,16 @@ package dev.yuyuyuyuyu.locationremover.testing
 
 import androidx.compose.ui.test.ComposeUiTest
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.hasScrollToNodeAction
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollTo
+import androidx.compose.ui.test.performScrollToNode
+import dev.yuyuyuyuyu.mycomposables.SimpleTopAppBarTestTags
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
@@ -33,10 +39,27 @@ suspend fun ComposeUiTest.clickWithoutScrolling(text: StringResource) {
 }
 
 @OptIn(ExperimentalTestApi::class)
-suspend fun ComposeUiTest.isShown(text: StringResource): Boolean {
-    val label = getString(text)
-    return onAllNodesWithText(label).fetchSemanticsNodes().isNotEmpty()
+suspend fun ComposeUiTest.clickMenuItem(itemTag: String) {
+    awaitUntil("the menu button is shown") { isTagShown(SimpleTopAppBarTestTags.MENU_BUTTON) }
+    onNodeWithTag(SimpleTopAppBarTestTags.MENU_BUTTON).performClick()
+    awaitUntil("the menu item $itemTag is shown") { isTagShown(itemTag) }
+    onNodeWithTag(itemTag).performClick()
 }
+
+@OptIn(ExperimentalTestApi::class)
+suspend fun ComposeUiTest.scrollTo(text: String) =
+    awaitUntil("\"$text\" is scrolled to") {
+        runCatching { onNode(hasScrollToNodeAction()).performScrollToNode(hasText(text)) }.isSuccess
+    }
+
+@OptIn(ExperimentalTestApi::class)
+suspend fun ComposeUiTest.isShown(text: StringResource): Boolean = isShown(getString(text))
+
+@OptIn(ExperimentalTestApi::class)
+fun ComposeUiTest.isShown(text: String): Boolean = onAllNodesWithText(text).fetchSemanticsNodes().isNotEmpty()
+
+@OptIn(ExperimentalTestApi::class)
+private fun ComposeUiTest.isTagShown(tag: String): Boolean = onAllNodesWithTag(tag).fetchSemanticsNodes().isNotEmpty()
 
 suspend fun awaitSharedFile(): File {
     awaitUntil("a file is shared") { ShareSheet.sharedFileOrNull() != null }

@@ -12,10 +12,14 @@ import dev.yuyuyuyuyu.locationremover.testing.awaitCopiedImage
 import dev.yuyuyuyuyu.locationremover.testing.awaitDownloadedFile
 import dev.yuyuyuyuyu.locationremover.testing.awaitSharedFile
 import dev.yuyuyuyuyu.locationremover.testing.click
+import dev.yuyuyuyuyu.locationremover.testing.clickMenuItem
 import dev.yuyuyuyuyu.locationremover.testing.clickWithoutScrolling
 import dev.yuyuyuyuyu.locationremover.testing.hasLocation
+import dev.yuyuyuyuyu.locationremover.testing.isShown
 import dev.yuyuyuyuyu.locationremover.testing.pictureWithLocation
 import dev.yuyuyuyuyu.locationremover.testing.restoreBrowser
+import dev.yuyuyuyuyu.locationremover.testing.scrollTo
+import dev.yuyuyuyuyu.mycomposables.SimpleTopAppBarTestTags
 import locationremover.shared.generated.resources.Res
 import locationremover.shared.generated.resources.copy
 import locationremover.shared.generated.resources.download
@@ -29,6 +33,7 @@ import kotlin.test.AfterTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalTestApi::class)
 class AppTest {
@@ -104,5 +109,20 @@ class AppTest {
 
             // Assert
             assertFalse(awaitSharedFile().byteArray().hasLocation())
+        }
+
+    @Test
+    fun `should show the licenses of the dependencies`() =
+        runComposeUiTest {
+            // Arrange
+            setContent { App() }
+
+            // Act
+            clickMenuItem(SimpleTopAppBarTestTags.OPEN_SOURCE_LICENSES_BUTTON)
+            scrollTo("kotlin-browser")
+
+            // Assert
+            assertTrue(isShown("kotlin-browser"))
+            assertTrue(isShown("Apache License 2.0"))
         }
 }
