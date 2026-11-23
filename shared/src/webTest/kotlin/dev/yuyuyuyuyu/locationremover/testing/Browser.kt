@@ -2,6 +2,7 @@ package dev.yuyuyuyuyu.locationremover.testing
 
 import js.typedarrays.Uint8Array
 import js.typedarrays.toUint8Array
+import web.blob.Blob
 import web.file.File
 
 object FileDialog {
@@ -24,6 +25,20 @@ object ShareSheet {
     fun sharedFileOrNull(): File? = sharedFile()
 }
 
+object Clipboard {
+    fun allow() = replaceClipboard(allowed = true)
+
+    fun refuse() = replaceClipboard(allowed = false)
+
+    fun copiedImageOrNull(): Blob? = copiedImage()
+}
+
+object Downloads {
+    fun replace() = replaceDownloads()
+
+    fun downloadedFileOrNull(): File? = downloadedFile()
+}
+
 object NewTab {
     fun replace() = replaceNewTab()
 
@@ -36,6 +51,8 @@ fun restoreBrowser(): Unit =
         const test = globalThis.locationRemoverTest;
         if (test?.click) HTMLInputElement.prototype.click = test.click;
         if (test?.open) window.open = test.open;
+        if (test?.anchorClick) HTMLAnchorElement.prototype.click = test.anchorClick;
+        delete navigator.clipboard;
         delete navigator.canShare;
         delete navigator.share;
         globalThis.locationRemoverTest = undefined;
@@ -110,3 +127,45 @@ private fun replaceNewTab(): Unit =
     )
 
 private fun openedUrl(): String? = js("globalThis.locationRemoverTest?.openedUrl ?? null")
+
+@Suppress("UnusedParameter")
+private fun replaceClipboard(allowed: Boolean): Unit =
+    js(
+        """{
+        const test = (globalThis.locationRemoverTest ??= {});
+        test.copiedImage = null;
+        const clipboard = {
+            write: async (items) => {
+                if (!allowed) throw new DOMException("Write permission denied.", "NotAllowedError");
+                const item = items[0];
+                test.copiedImage = await item.getType(item.types[0]);
+            },
+        };
+        Object.defineProperty(navigator, "clipboard", { configurable: true, value: clipboard });
+    }""",
+    )
+
+private fun copiedImage(): Blob? = js("globalThis.locationRemoverTest?.copiedImage ?? null")
+
+private fun replaceDownloads(): Unit =
+    js(
+        """{
+        const test = (globalThis.locationRemoverTest ??= {});
+        test.anchorClick ??= HTMLAnchorElement.prototype.click;
+        test.downloadedFile = null;
+        HTMLAnchorElement.prototype.click = function () {
+            if (!this.download) {
+                test.anchorClick.call(this);
+                return;
+            }
+            const name = this.download;
+            fetch(this.href)
+                .then((response) => response.blob())
+                .then((blob) => {
+                    test.downloadedFile = new File([blob], name, { type: blob.type });
+                });
+        };
+    }""",
+    )
+
+private fun downloadedFile(): File? = js("globalThis.locationRemoverTest?.downloadedFile ?? null")

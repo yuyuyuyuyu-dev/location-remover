@@ -82,7 +82,6 @@ kotlin {
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
-            implementation(libs.kotlinx.coroutinesTest)
         }
         webMain.dependencies {
             implementation(libs.wrappers.browser)

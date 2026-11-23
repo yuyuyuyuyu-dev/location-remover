@@ -21,7 +21,7 @@ suspend fun pictureRotatedClockwiseByExif(): ByteArray {
 
 suspend fun Blob.pictureSize(): PictureSize = createImageBitmap(this).use { PictureSize(it.width, it.height) }
 
-fun ByteArray.hasLocation(): Boolean = exifSegments().any { tiff -> GPS_INFO_TAG in tiff.ifd0Tags() }
+fun ByteArray.hasLocation(): Boolean = exifTiffs().any { tiff -> GPS_INFO_TAG in tiff.ifd0Tags() }
 
 private suspend fun jpeg(size: PictureSize): ByteArray {
     val canvas = document.createElement(HtmlTagName.canvas)
@@ -78,7 +78,14 @@ private fun tiff(orientation: Int?): ByteArray {
 
 private fun ifdSize(entryCount: Int) = ENTRY_COUNT_SIZE + entryCount * ENTRY_SIZE + NEXT_IFD_OFFSET_SIZE
 
-private fun ByteArray.exifSegments(): List<ByteArray> {
+private fun ByteArray.exifTiffs(): List<ByteArray> =
+    when {
+        startsWith(JPEG_SIGNATURE) -> jpegExifSegments()
+        startsWith(PNG_SIGNATURE) -> pngExifChunks()
+        else -> error("The picture is neither a JPEG nor a PNG.")
+    }
+
+private fun ByteArray.jpegExifSegments(): List<ByteArray> {
     val segments = mutableListOf<ByteArray>()
     var position = SOI_SIZE
     while (position + SEGMENT_HEADER_SIZE <= size && u8(position) == MARKER_PREFIX) {
@@ -93,6 +100,21 @@ private fun ByteArray.exifSegments(): List<ByteArray> {
         position += MARKER_SIZE + length
     }
     return segments
+}
+
+private fun ByteArray.pngExifChunks(): List<ByteArray> {
+    val chunks = mutableListOf<ByteArray>()
+    var position = PNG_SIGNATURE.size
+    while (position + CHUNK_HEADER_SIZE <= size) {
+        val length = u32(position, littleEndian = false)
+        val type = copyOfRange(position + CHUNK_LENGTH_SIZE, position + CHUNK_HEADER_SIZE).decodeToString()
+        if (type == IEND_CHUNK) break
+
+        val dataStart = position + CHUNK_HEADER_SIZE
+        if (type == EXIF_CHUNK) chunks += copyOfRange(dataStart, dataStart + length)
+        position = dataStart + length + CHUNK_CRC_SIZE
+    }
+    return chunks
 }
 
 private fun ByteArray.ifd0Tags(): List<Int> {
@@ -153,6 +175,8 @@ private class BigEndian {
     fun toByteArray() = bytes.toByteArray()
 }
 
+private val JPEG_SIGNATURE = byteArrayOf(0xFF.toByte(), 0xD8.toByte())
+private val PNG_SIGNATURE = byteArrayOf(0x89.toByte(), 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A)
 private val EXIF_HEADER = byteArrayOf(0x45, 0x78, 0x69, 0x66, 0x00, 0x00)
 
 private const val BYTE_MASK = 0xFF
@@ -165,6 +189,13 @@ private const val SOI_SIZE = 2
 private const val MARKER_SIZE = 2
 private const val SEGMENT_LENGTH_SIZE = 2
 private const val SEGMENT_HEADER_SIZE = MARKER_SIZE + SEGMENT_LENGTH_SIZE
+
+private const val CHUNK_LENGTH_SIZE = 4
+private const val CHUNK_TYPE_SIZE = 4
+private const val CHUNK_HEADER_SIZE = CHUNK_LENGTH_SIZE + CHUNK_TYPE_SIZE
+private const val CHUNK_CRC_SIZE = 4
+private const val EXIF_CHUNK = "eXIf"
+private const val IEND_CHUNK = "IEND"
 
 private const val TIFF_MAGIC_NUMBER = 42
 private const val IFD0_OFFSET_POSITION = 4

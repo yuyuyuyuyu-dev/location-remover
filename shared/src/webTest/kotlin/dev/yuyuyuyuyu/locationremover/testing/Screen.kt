@@ -11,6 +11,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.getString
+import web.blob.Blob
 import web.file.File
 import kotlin.test.fail
 import kotlin.time.Duration
@@ -40,6 +41,16 @@ suspend fun ComposeUiTest.isShown(text: StringResource): Boolean {
 suspend fun awaitSharedFile(): File {
     awaitUntil("a file is shared") { ShareSheet.sharedFileOrNull() != null }
     return checkNotNull(ShareSheet.sharedFileOrNull())
+}
+
+suspend fun awaitCopiedImage(): Blob {
+    awaitUntil("an image is copied") { Clipboard.copiedImageOrNull() != null }
+    return checkNotNull(Clipboard.copiedImageOrNull())
+}
+
+suspend fun awaitDownloadedFile(): File {
+    awaitUntil("a file is downloaded") { Downloads.downloadedFileOrNull() != null }
+    return checkNotNull(Downloads.downloadedFileOrNull())
 }
 
 suspend fun awaitUntil(
