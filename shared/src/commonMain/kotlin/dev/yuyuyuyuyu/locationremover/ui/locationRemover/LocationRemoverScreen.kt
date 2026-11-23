@@ -3,7 +3,7 @@ package dev.yuyuyuyuyu.locationremover.ui.locationRemover
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -14,9 +14,11 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -27,6 +29,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import locationremover.shared.generated.resources.Res
+import locationremover.shared.generated.resources.copied_to_clipboard
+import locationremover.shared.generated.resources.copy
+import locationremover.shared.generated.resources.copying_failed
+import locationremover.shared.generated.resources.copying_may_not_be_supported
 import locationremover.shared.generated.resources.download
 import locationremover.shared.generated.resources.exif_removed_image
 import locationremover.shared.generated.resources.ok
@@ -42,9 +48,11 @@ import org.jetbrains.compose.resources.stringResource
 @Composable
 fun LocationRemoverScreen(
     viewModel: LocationRemoverViewModel,
+    snackbarHostState: SnackbarHostState,
     modifier: Modifier = Modifier,
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val copiedMessage = stringResource(Res.string.copied_to_clipboard)
 
     Column(
         modifier =
@@ -86,16 +94,23 @@ fun LocationRemoverScreen(
                 modifier = Modifier.widthIn(max = 640.dp),
             )
 
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Button(onClick = viewModel::onDownloadButtonClicked) {
-                    Text(stringResource(Res.string.download))
-                }
-
-                Button(onClick = viewModel::onShareButtonClicked) {
-                    Text(stringResource(Res.string.share))
-                }
-            }
+            ExifRemovedJpegActions(
+                onDownloadButtonClicked = viewModel::onDownloadButtonClicked,
+                onCopyButtonClicked = viewModel::onCopyButtonClicked,
+                onShareButtonClicked = viewModel::onShareButtonClicked,
+            )
         }
+    }
+
+    if (uiState.copiedMessageIsShown) {
+        LaunchedEffect(Unit) {
+            snackbarHostState.showSnackbar(copiedMessage)
+            viewModel.onCopiedMessageShown()
+        }
+    }
+
+    if (uiState.copyingFailedDialogIsShown) {
+        CopyingFailedDialog(onDismissRequest = viewModel::onCopyingFailedDialogDismissed)
     }
 
     if (uiState.sharingIsNotSupportedDialogIsShown) {
@@ -118,6 +133,44 @@ private fun JpegImage(
         contentDescription = contentDescription,
         modifier = modifier.fillMaxWidth(),
         contentScale = ContentScale.FillWidth,
+    )
+}
+
+@Composable
+private fun ExifRemovedJpegActions(
+    onDownloadButtonClicked: () -> Unit,
+    onCopyButtonClicked: () -> Unit,
+    onShareButtonClicked: () -> Unit,
+) {
+    FlowRow(
+        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Button(onClick = onDownloadButtonClicked) {
+            Text(stringResource(Res.string.download))
+        }
+
+        Button(onClick = onCopyButtonClicked) {
+            Text(stringResource(Res.string.copy))
+        }
+
+        Button(onClick = onShareButtonClicked) {
+            Text(stringResource(Res.string.share))
+        }
+    }
+}
+
+@Composable
+private fun CopyingFailedDialog(onDismissRequest: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        confirmButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(stringResource(Res.string.ok))
+            }
+        },
+        title = { Text(stringResource(Res.string.copying_failed)) },
+        text = { Text(stringResource(Res.string.copying_may_not_be_supported)) },
     )
 }
 

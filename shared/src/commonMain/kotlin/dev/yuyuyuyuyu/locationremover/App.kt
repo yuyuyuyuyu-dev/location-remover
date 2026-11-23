@@ -6,6 +6,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -15,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import dev.yuyuyuyuyu.locationremover.image.createExifRemover
+import dev.yuyuyuyuyu.locationremover.image.createImageCopier
 import dev.yuyuyuyuyu.locationremover.image.createImageDownloader
 import dev.yuyuyuyuyu.locationremover.image.createImagePicker
 import dev.yuyuyuyuyu.locationremover.image.createImageSharer
@@ -38,9 +41,11 @@ fun App() {
                 imagePicker = createImagePicker(),
                 exifRemover = createExifRemover(),
                 imageDownloader = createImageDownloader(),
+                imageCopier = createImageCopier(),
                 imageSharer = createImageSharer(),
             )
         }
+    val snackbarHostState = remember { SnackbarHostState() }
     val uriHandler = LocalUriHandler.current
 
     MyMaterialTheme {
@@ -48,6 +53,7 @@ fun App() {
             topBar = {
                 TopAppBar(title = { Text(stringResource(Res.string.app_name)) })
             },
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             bottomBar = {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -61,6 +67,7 @@ fun App() {
         ) { innerPadding ->
             LocationRemoverScreen(
                 viewModel = viewModel,
+                snackbarHostState = snackbarHostState,
                 modifier = Modifier.padding(innerPadding),
             )
         }
