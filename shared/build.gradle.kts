@@ -6,6 +6,7 @@ plugins {
     alias(libs.plugins.androidMultiplatformLibrary)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
+    alias(libs.plugins.aboutLibraries)
     alias(libs.plugins.ktlint)
     alias(libs.plugins.detekt)
 }
@@ -75,7 +76,8 @@ kotlin {
             implementation(libs.androidx.lifecycle.viewmodelCompose)
             implementation(libs.androidx.lifecycle.runtimeCompose)
             implementation(libs.kotlinx.coroutinesCore)
-            implementation(libs.yuyuyuyuyu.myMaterialTheme)
+            implementation(libs.yuyuyuyuyu.myComposables)
+            implementation(libs.aboutLibraries.composeCore)
         }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
@@ -85,6 +87,30 @@ kotlin {
             implementation(libs.wrappers.browser)
         }
     }
+}
+
+aboutLibraries {
+    export {
+        outputFile = layout.buildDirectory.file("generated/libraryDefinitions/aboutlibraries.json")
+    }
+}
+
+val commonMainComposeResourcesDirectory = layout.buildDirectory.dir("generated/commonMainComposeResources")
+
+val syncCommonMainComposeResources =
+    tasks.register<Sync>("syncCommonMainComposeResources") {
+        from("src/commonMain/composeResources")
+        from(tasks.named("exportLibraryDefinitions")) {
+            into("files")
+        }
+        into(commonMainComposeResourcesDirectory)
+    }
+
+compose.resources {
+    customDirectory(
+        sourceSetName = "commonMain",
+        directoryProvider = syncCommonMainComposeResources.map { commonMainComposeResourcesDirectory.get() },
+    )
 }
 
 dependencies {
