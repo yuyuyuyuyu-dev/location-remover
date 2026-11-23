@@ -1,6 +1,7 @@
 package dev.yuyuyuyuyu.locationremover.ui.locationRemover
 
 import dev.yuyuyuyuyu.locationremover.image.ExifRemover
+import dev.yuyuyuyuyu.locationremover.image.ImageCopier
 import dev.yuyuyuyuyu.locationremover.image.ImageDownloader
 import dev.yuyuyuyuyu.locationremover.image.ImagePicker
 import dev.yuyuyuyuyu.locationremover.image.ImageSharer
@@ -15,6 +16,8 @@ import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertContentEquals
 import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class LocationRemoverViewModelTest {
@@ -36,10 +39,38 @@ class LocationRemoverViewModelTest {
     }
 
     @Test
-    @Suppress("ForbiddenComment")
-    fun `should copy the picture the location was removed from to the clipboard`() {
-        // TODO: Not implemented yet.
-    }
+    fun `should copy the picture the location was removed from to the clipboard`() =
+        runTest {
+            // Arrange
+            val imageCopier = FakeImageCopier(canCopy = true)
+            val viewModel = createViewModel(imageCopier = imageCopier)
+            viewModel.onSelectImageButtonClicked()
+            viewModel.onRemoveExifButtonClicked()
+
+            // Act
+            viewModel.onCopyButtonClicked()
+
+            // Assert
+            assertContentEquals(EXIF_REMOVED_JPEG, imageCopier.copiedJpeg)
+            assertTrue(viewModel.uiState.value.copiedMessageIsShown)
+            assertFalse(viewModel.uiState.value.copyingFailedDialogIsShown)
+        }
+
+    @Test
+    fun `should tell that the picture could not be copied to the clipboard`() =
+        runTest {
+            // Arrange
+            val viewModel = createViewModel(imageCopier = FakeImageCopier(canCopy = false))
+            viewModel.onSelectImageButtonClicked()
+            viewModel.onRemoveExifButtonClicked()
+
+            // Act
+            viewModel.onCopyButtonClicked()
+
+            // Assert
+            assertTrue(viewModel.uiState.value.copyingFailedDialogIsShown)
+            assertFalse(viewModel.uiState.value.copiedMessageIsShown)
+        }
 
     @Test
     @Suppress("ForbiddenComment")
@@ -68,8 +99,9 @@ class LocationRemoverViewModelTest {
         imagePicker: ImagePicker = FakeImagePicker(PICKED_JPEG),
         exifRemover: ExifRemover = FakeExifRemover(EXIF_REMOVED_JPEG),
         imageDownloader: ImageDownloader = FakeImageDownloader(),
+        imageCopier: ImageCopier = FakeImageCopier(canCopy = true),
         imageSharer: ImageSharer = FakeImageSharer(canShare = true),
-    ) = LocationRemoverViewModel(imagePicker, exifRemover, imageDownloader, imageSharer)
+    ) = LocationRemoverViewModel(imagePicker, exifRemover, imageDownloader, imageCopier, imageSharer)
 
     private companion object {
         private val PICKED_JPEG = byteArrayOf(1, 2, 3)
@@ -101,6 +133,18 @@ private class FakeImageDownloader : ImageDownloader {
     ) {
         downloadedJpeg = jpeg
         downloadedFileName = fileName
+    }
+}
+
+private class FakeImageCopier(
+    private val canCopy: Boolean,
+) : ImageCopier {
+    var copiedJpeg: ByteArray? = null
+        private set
+
+    override suspend fun tryCopy(jpeg: ByteArray): Boolean {
+        if (canCopy) copiedJpeg = jpeg
+        return canCopy
     }
 }
 

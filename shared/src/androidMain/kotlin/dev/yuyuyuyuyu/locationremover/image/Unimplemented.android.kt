@@ -11,3 +11,5 @@ actual fun createExifRemover(): ExifRemover = TODO("Removing Exif is implemented
 actual fun createImageDownloader(): ImageDownloader = TODO("Downloading an image is implemented for the web only.")
 
 actual fun createImageSharer(): ImageSharer = TODO("Sharing an image is implemented for the web only.")
+
+actual fun createImageCopier(): ImageCopier = TODO("Copying an image is implemented for the web only.")
