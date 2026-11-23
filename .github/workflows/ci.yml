@@ -28,10 +28,18 @@ jobs:
       compose-multiplatform: true
 
   tests:
-    name: Run Tests
+    name: Run Tests (${{ matrix.target }})
     runs-on: ubuntu-latest
     permissions:
       contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: wasmJs
+            task: wasmJsTest
+          - target: Android
+            task: testAndroidHostTest
     steps:
       - name: Check out the repository
         uses: actions/checkout@v7
@@ -44,7 +52,7 @@ jobs:
           compose-multiplatform: true
 
       - name: Run Tests
-        run: ./gradlew allTests
+        run: ./gradlew ${{ matrix.task }}
 
   build:
     name: Build Distribution
