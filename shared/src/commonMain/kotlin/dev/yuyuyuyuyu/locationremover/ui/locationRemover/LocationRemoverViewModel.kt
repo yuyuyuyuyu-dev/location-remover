@@ -21,8 +21,9 @@ class LocationRemoverViewModel(
     private val imageCopier: ImageCopier,
     private val imageSharer: ImageSharer,
     private val uriHandler: UriHandler,
+    sharedJpeg: ByteArray? = null,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(LocationRemoverUiState())
+    private val _uiState = MutableStateFlow(LocationRemoverUiState(selectedJpeg = sharedJpeg))
     val uiState: StateFlow<LocationRemoverUiState> = _uiState.asStateFlow()
 
     fun onSelectImageButtonClicked() {

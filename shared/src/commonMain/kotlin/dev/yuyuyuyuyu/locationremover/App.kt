@@ -29,10 +29,10 @@ private const val SOURCE_CODE_URL = "https://github.com/yuyuyuyuyu-dev/location-
 
 @Composable
 @Preview
-fun App() {
+fun App(sharedJpeg: ByteArray? = null) {
     val uriHandler = LocalUriHandler.current
     val viewModel =
-        remember {
+        remember(sharedJpeg) {
             LocationRemoverViewModel(
                 imagePicker = createImagePicker(),
                 exifRemover = createExifRemover(),
@@ -40,6 +40,7 @@ fun App() {
                 imageCopier = createImageCopier(),
                 imageSharer = createImageSharer(),
                 uriHandler = uriHandler,
+                sharedJpeg = sharedJpeg,
             )
         }
     val snackbarHostState = remember { SnackbarHostState() }

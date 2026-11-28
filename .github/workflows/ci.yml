@@ -39,7 +39,7 @@ jobs:
           - target: wasmJs
             task: wasmJsTest
           - target: Android
-            task: testAndroidHostTest
+            task: testAndroidHostTest :androidApp:testDebugUnitTest
     steps:
       - name: Check out the repository
         uses: actions/checkout@v7
